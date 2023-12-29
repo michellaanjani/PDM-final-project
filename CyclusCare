@@ -1,0 +1,847 @@
+//Codingan FINPRO PDM - LB20
+//Angelyn Gunawan
+//Calista Paramitha Chandra
+//Michella Maria Anjani
+//Ni Putu Odelia Nara Patni
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <time.h>
+
+#define MAX_USER 100
+
+
+
+enum status{
+	VIP = 1,
+	REGULAR,
+	GUEST,
+	ADMIN
+};
+
+typedef struct{
+	struct tm lastDate;
+} mensData;
+
+typedef struct{
+	char username[20];
+	enum status sD;
+	char password[50];
+	int age;
+	char email[100];
+	char fullName[100];
+	mensData mens;
+} userData;
+
+
+//Function prototype, validation function
+int passValidation(const char *password, const char *confirmPass);
+int emailValidation(const char *email);
+int userValidation(userData data[], int userCount, const char *username);
+
+//Function prototype, all function/module in CyclusCare
+void signUP(userData data[], int userCount);
+void forgotPass(userData data[], int userCount);
+void signIN(userData data[], int userCount);
+
+void mainMenu();
+void doctorMenu();
+void doctorUp();
+void generalArticle();
+void consultVIP();
+
+void detectCycle(userData data[], int userCount);
+void phase(userData data[], int userCount);
+void predict(userData data[], int userCount);
+void consult(userData data[], int userCount);
+
+void subs(userData data[], int userCount);
+
+
+
+int main (){
+	printf("===================================================\n");
+	printf("============== Welcome to CyclusCare ==============\n");
+	printf("===================================================\n");
+	printf("\nAre you new to CyclusFamily?\n");
+	printf("1. Yes, I am new. Please take care of me! ^^\n");
+	printf("2. Nope, I'm not. I'm bacc from da dead. (This is not recommended as file handling is not\n yet included in this program.)\n");
+	printf("Choose now ^^: ");
+	userData data[MAX_USER];
+	int opt1, opt2, userCount = 0, opt9, opt10;
+	scanf("%d", &opt1);
+	printf("\n");
+	switch (opt1){
+		case 1: //Show Register Page
+			do{
+				printf("Okay, Let's get you going shall we? Please register.\n");
+				printf("1. Cool!, Let's go!!\n");
+				printf("2. Nah! Skip this step >.O\n");
+				printf("So?: ");
+				scanf("%d", &opt2);
+				printf("\n");
+				switch (opt2){
+					case 1:
+						signUP(data, userCount);
+						break;
+					case 2:
+						break;
+						userCount++;
+						data[userCount].sD = GUEST;
+					default:
+						printf("Huh? we don't get what you mean just now, please try again!");	
+						break;
+				}
+			} while (opt2 > 2 || opt2 < 1);
+			break;
+			
+		case 2: //Show Login Page
+			printf("Nice! It's great to have you back!\n");
+			signIN(data, userCount);
+			break;
+	}
+	
+	do{
+		printf("In this line, will be the general Article inserted by our dear Doctors!\n");
+		mainMenu();	
+		scanf("%d", &opt9);
+		printf("\n");
+		switch (opt9){
+			case 1:
+				switch(data[userCount].sD){
+					case GUEST:
+						printf("Guests don't have access to this feature, please register first!\n");
+						signUP(data, userCount);
+						break;
+					case REGULAR:
+						detectCycle(data, userCount);
+						break;
+					case VIP:
+						detectCycle(data, userCount);
+						break;
+					default:
+						printf("Invalid user status.\n");
+						break;
+				}
+				break;
+			
+			case 2:
+				switch(data[userCount].sD){
+					case GUEST:
+						printf("Guests don't have access to this feature, please register first!\n");
+						signUP(data, userCount);
+						break;
+					case REGULAR:
+						phase(data, userCount);;
+						break;
+					case VIP:
+						phase(data, userCount);;
+						break;
+					default:
+						printf("Invalid user status.\n");
+						break;
+				}
+				break;
+			
+			case 3:
+				switch(data[userCount].sD){
+					case GUEST:
+						printf("Guests don't have access to this feature, please register first!\n");
+						signUP(data, userCount);
+						break;
+					case REGULAR:
+						predict(data, userCount);
+						break;
+					case VIP:
+						predict(data, userCount);
+						break;
+					default:
+						printf("Invalid user status.\n");
+						break;
+				}
+				break;
+			
+			case 4:
+				switch(data[userCount].sD){
+					case GUEST:
+						printf("Guests don't have access to this feature, please register first!");
+						signUP(data, userCount);
+						break;
+					case REGULAR:
+						printf("You need to subscribe first to access this feature!\n");
+						subs(data, userCount);
+						break;
+					case VIP:
+						consult(data, userCount);
+						break;
+					default:
+						printf("Invalid user status.\n");
+						break;
+				}
+				break;
+			
+			default: 
+				printf("Your input is invalid, please try again\n");
+				break;
+		}
+	} while (opt9 < 1 || opt9 > 4);
+	
+	do{
+		printf("Done! Can we still do something for you, %s?\n", data[userCount].username);
+		printf("1. Yes, there is!\n");
+		printf("2. Nope, you've done enough!\n");
+		printf("Enter your decision ^^: ");
+		scanf("%d", &opt10);
+		printf("\n");
+		switch (opt10){
+			case 1:
+			do{
+				printf("In this line, will be the general Article inserted by our dear Doctors!\n");
+				mainMenu();
+				scanf("%d", &opt9);
+				switch (opt9){
+					case 1:
+					switch(data[userCount].sD){
+						case GUEST:
+							printf("Guests don't have access to this feature, please register first!\n");
+							signUP(data, userCount);
+							break;
+						case REGULAR:
+							detectCycle(data, userCount);
+							break;
+						case VIP:
+							detectCycle(data, userCount);
+							break;
+						default:
+							printf("Invalid user status.\n");
+							break;
+					}
+					break;
+			
+				case 2:
+					switch(data[userCount].sD){
+						case GUEST:
+							printf("Guests don't have access to this feature, please register first!\n");
+							signUP(data, userCount);
+							break;
+						case REGULAR:
+							phase(data, userCount);;
+							break;
+						case VIP:
+							phase(data, userCount);;
+							break;
+						default:
+							printf("Invalid user status.\n");
+							break;
+					}
+					break;
+			
+				case 3:
+					switch(data[userCount].sD){
+						case GUEST:
+							printf("Guests don't have access to this feature, please register first!\n");
+							signUP(data, userCount);
+							break;
+						case REGULAR:
+							predict(data, userCount);
+							break;
+						case VIP:
+							predict(data, userCount);
+							break;
+						default:
+							printf("Invalid user status.\n");
+							break;
+					}
+					break;
+			
+				case 4:
+					switch(data[userCount].sD){
+						case GUEST:
+							printf("Guests don't have access to this feature, please register first!\n");
+							signUP(data, userCount);
+							break;
+						case REGULAR:
+							printf("You need to subscribe first to access this feature!\n");
+							subs(data, userCount);
+							break;
+						case VIP:
+							consult(data, userCount);
+							break;
+						default:
+							printf("Invalid user status.\n");
+							break;
+					}
+					break;
+			
+				default: 
+					printf("Your input is invalid, please try again\n");
+					break;
+				}		
+			} while (opt9  < 1 || opt9 > 4);
+		
+			case 2: 
+				printf("Bye-Bye! Now we are proceeding to exit the program! ^^\n");
+			}
+		} while (opt10 == 1);		
+	
+	return 0;
+}
+
+
+
+void detectCycle(userData data[], int userCount){
+	// Ask the user for the last period date
+	int year, month, day;
+    printf("Enter your last period date (YYYY MM DD): ");
+    scanf("%d %d %d", &year, &month, &day);
+          
+    // Adjust the values since struct tm uses 0-based indexing for months
+    data[userCount].mens.lastDate.tm_year = year - 1900;
+	data[userCount].mens.lastDate.tm_mon = month - 1;
+    data[userCount].mens.lastDate.tm_mday = day;
+
+	time_t currentTime = time(NULL);
+	struct tm* currentDate = localtime(&currentTime);
+	
+	double length = difftime(mktime(currentDate), mktime(&data[userCount].mens.lastDate))/(60*60*24);
+	if (length >= 24 && length <= 38){
+			printf("Your menstrual cycle is regular.\n");
+	} else if (length >= 1 && length <= 8){
+		printf("You are supposed to on your period now.\n");	
+	} else {
+		int opt10, opt11;
+		printf("Your menstrual cycle is irregular.\n");
+		printf("If this issue has prolonged to your concern, you may consult with our doctor!\n");
+		printf("1. Yes, I would like to.\n");
+		printf("2. Nope, I'm good.\n");
+		scanf("%d", &opt10);
+		printf("\n");
+		switch (opt10){
+			case 1:
+				switch(data[userCount].sD){
+					case REGULAR:
+						do{
+							printf("Oops! To access this feature, you need to subscribe first!\n");
+							printf("1. Let's do that!\n");
+							printf("2. Okay, Then let me reconsider...\n");
+							scanf("%d", &opt11);
+							printf("\n");
+							switch (opt11){
+								case 1:
+									subs(data, userCount);
+									break;
+								case 2:
+									printf("Very well, Have a nice day! ^^\n");
+									break;
+								default:
+									printf("Your input is invalid!\n");
+									break;
+							}
+						} while (opt11 < 1 || opt11 > 2);
+						break;
+					case VIP:
+						consult(data, userCount);
+						break;
+					default:
+						printf("Invalid user status.\n");
+				}
+				break;
+				
+			case 2:
+				printf("Very well, Have a nice day! ^^\n");
+				break;
+			
+			default: 
+				printf("Your input is invalid!\n");
+				break;
+		}
+	}
+
+	return;
+}
+
+void phase(userData data[], int userCount){
+	int opt10, opt11;
+	
+	// Ask the user for the last period date
+	int year, month, day;
+    printf("Enter your last period date (YYYY MM DD): ");
+    scanf("%d %d %d", &year, &month, &day);
+        printf("\n");
+		  
+    // Adjust the values since struct tm uses 0-based indexing for months
+    data[userCount].mens.lastDate.tm_year = year - 1900;
+	data[userCount].mens.lastDate.tm_mon = month - 1;
+    data[userCount].mens.lastDate.tm_mday = day;
+    
+	time_t currentTime = time(NULL);
+	struct tm* currentDate = localtime(&currentTime);
+	
+	double length = difftime(mktime(currentDate), mktime(&data[userCount].mens.lastDate))/(60*60*24);
+	
+	if (length >= 1 && length <= 13){
+		if (length <= 7){
+			printf("You are in your menstrual phase.\n");
+		} else {
+			printf("You are in your folicular phase.\n");
+		}
+	} else if (length == 14){
+		printf("You are in your ovulation phase.\n");
+	} else if (length >= 15 && length <= 38){
+		printf("You are in your luteal phase.\n");
+	} else {
+		printf("Currently, you are missing on your period, if this continue, we recommend you to reach out to a doctor should this persist.\n");
+		printf("1. Yes, I would like that.\n");
+		printf("2. Nope, I'm good.\n");
+		scanf("%d", &opt10);
+		printf("\n");
+		switch (opt10){
+			case 1:
+				switch(data[userCount].sD){
+					case REGULAR:
+						do{
+							printf("Oops! To access this feature, you need to subscribe first!\n");
+							printf("1. Let's do that!\n");
+							printf("2. Okay, Then let me reconsider...\n");
+							scanf("%d", &opt11);
+							printf("\n");
+							switch (opt11){
+								case 1:
+									subs(data, userCount);
+									break;
+								case 2:
+									printf("Very well, Have a nice day! ^^\n");
+									break;
+								default:
+									printf("Your input is invalid!\n");
+									break;
+							}
+						} while (opt11 < 1 || opt11 > 2);
+						break;
+					case VIP:
+						consult(data, userCount);
+						break;
+					default:
+						printf("Invalid user status.\n");
+				}
+				break;
+				
+			case 2:
+				printf("Very well, Have a nice day! ^^\n");
+				break;
+			
+			default: 
+				printf("Your input is invalid!\n");
+				break;
+		}
+	}
+	
+	return;
+}
+
+void predict(userData data[], int userCount) {
+        //prompt the user to input the last period date
+        struct tm lastDate = {0};
+        int year, month, day;
+        printf("Please enter the date of your last period (YYYY MM DD): ");
+        scanf("%d %d %d", &year, &month, &day);
+		printf("\n");
+		
+        // Adjust the value since struct tm uses 0-based indexing for months
+        lastDate.tm_year = year - 1900;
+        lastDate.tm_mon = month - 1;
+        lastDate.tm_mday = day;
+
+        data[userCount].mens.lastDate = lastDate;
+
+        // Calculate the average cycle length based on normal length data
+        int Nc = 28;
+        time_t nextPeriodTime = mktime(&lastDate) + Nc * 24 * 60 * 60;
+
+        // Convert the result back to a struct tm
+        struct tm* nextPeriodDate = localtime(&nextPeriodTime);
+
+        // Display the predicted next period date
+        printf("Predicted next period date: %d %d %d\n", nextPeriodDate->tm_mday, nextPeriodDate->tm_mon + 1, nextPeriodDate->tm_year + 1900);
+    
+    return;
+}
+
+
+void consult(userData data[], int userCount){
+	int opt11;
+	if(data[userCount].sD == VIP){
+		printf("Please enter your char below!\n");
+		printf("1 2 3\n");
+		printf("This feature has not yet been fully developed due to lack of time resouces TT ~ TT\n");
+	} else {
+		printf("This feature is exclusive to VIP users. Please subscribe first!\n");
+		printf("1. Let's do that!\n");
+		printf("2. Okay, Then let me reconsider...\n");
+		scanf("%d", &opt11);
+		printf("\n");
+		
+		switch (opt11){
+			case 1:
+				subs(data, userCount);
+				break;
+			case 2:
+				printf("Very well, Have a nice day! ^^\n");
+				break;
+			default:
+				printf("Your input is invalid!\n");
+				break;
+		}
+	}
+	
+	return;
+}
+
+void subs(userData data[], int userCount){
+	int opt12;
+	if (data[userCount].sD == REGULAR){
+		printf("1. Click this button to proceed your subscription\n");
+		printf("2. No, I want to cancel my subscription.\n");
+		scanf("%d", &opt12);
+		printf("\n");
+		switch (opt12){
+			case 1:
+				printf("Congratulations! You are now a VIP.\n");
+				data[userCount].sD = VIP;
+			case 2:
+				printf("Very well, have a nice day!\n");
+			default:
+				printf("Your input is invalid\n");
+		}
+	} else {
+		printf("This particular option is only exclusive to regulars\n");
+	}
+	
+	return;
+}
+
+void mainMenu(){
+	printf("What can CyclusCare do for you?, Dear Customer?\n");
+	printf("1. Detect your cycle pattern.\n");
+	printf("2. Check what your current menstrual phase is.\n");
+	printf("3. Check you next period date prediction.\n");
+	printf("4. Show me additional features you provide.\n");
+	printf("Please enter your option: ");
+	return;
+}
+
+int passValidation(const char *password, const char *confirmPass){
+	int error = 0;
+	if (strcmp(password, confirmPass) != 0){
+		error = 1; //Password don't match
+	};
+	
+	size_t passLength = strlen(password);
+	if(passLength < 8){
+		error = 1; 
+	}
+	
+	int digit = 0;
+	for (size_t i = 0; i < passLength; i++){
+		if (isdigit(password[i])){
+			digit++;
+		}
+	}
+	
+	if (!digit){
+		error = 1 ;
+	}
+	
+	return error ? 0 : 1; //1 = success, 0 = no error
+}
+
+int emailValidation(const char *email){
+	const char *gmailF = "@gmail.com";
+	size_t eLen = strlen(email);
+	size_t Flen = strlen(gmailF);
+	
+	if (eLen <= Flen){
+		return 0;
+	}
+	
+	return (strcmp(email + eLen - Flen, gmailF) == 0);
+}
+
+int userValidation(userData data[], int userCount, const char *username){
+	for (int i = 0; i < userCount; i++){
+		if (strcmp(username, data[i].username) == 0){
+			return 1; //Indicates the username has been taken
+		}
+	}
+	
+	return 0; //username is not taken
+}
+
+void forgotPass(userData data[], int userCount){
+	char tempU[50], tempE[50];
+	
+	printf("Enter your username for password recovery: ");
+	scanf("%s", tempE);
+	printf("\n");
+	
+	int index = -1;
+	for (int i = 0; i < userCount; i++){
+		if(strcmp(tempE, data[i].username) == 0){
+			index = i; break;
+		}
+	}
+	
+	if (index == -1){
+		printf("Error: User not found, please input the correct username or register!\n");
+		printf("1. I'll re-enter the username\n");
+		printf("2. Let's register\n");
+		int opt7;
+		scanf("%d", &opt7);
+		printf("\n");
+		do {
+			switch (opt7){
+				case 1:
+					printf("Enter your username for password recovery: ");
+					scanf("%s", tempE);
+					printf("\n");
+					int index1 = -1;
+					for (int i = 0; i < userCount; i++){
+						if(strcmp(tempE, data[i].username) == 0){
+							index1 = i; break;
+						}
+					}
+				
+					if (index1 == -1){
+						printf("Oops! Error again!, We now believe that you mayhaps registered to CyclusCare.\n");
+						printf("Proceeds to registering page...\n");
+						signUP(data, userCount);
+					}
+					break;
+			
+				case 2: 
+					printf("Okay! Redirecting you to registering page...\n");
+					signUP(data, userCount);
+					break;
+				
+				default:
+					printf("Your input is invalid! Please re-input\n");
+					break;
+			}
+		} while (opt7 < 1 || opt7 > 2);	
+	}
+	
+	int opt8;
+	char cPass[50], pass[50];
+	printf("Loading to send verification link to your email address:\n");
+	printf("%s's Email Page:\n ", data[index].username);
+	printf("Dear %s, you have received an verification link!\n");
+	printf("1. Click it.\n");
+	printf("2. Ignore it, I don't care what that is.");
+	printf("Please consider your option as invalid input will be considered as it is");
+	scanf("%d", &opt8);
+	printf("\n");
+	switch (opt8){
+		case 1: 
+			do {
+				printf("Please create your password!\n");
+				scanf("%s", pass);			
+				printf("Please confirm your password!\n");
+				scanf("%s", cPass);
+				printf("\n");
+				
+				if(!passValidation(pass, cPass)){
+					printf("Please re-confirm or re-enter your password");
+				}
+			} while (!passValidation(pass, cPass));
+			break;
+		
+		case 2:
+			break;
+		
+		default: 
+			break; //Every invalid input will be considered as an ignore option
+	}
+	
+	return;
+}
+
+void signUP(userData data[], int userCount){
+	char tempUser[50], fName[50], lName[50], tempEmail[50], pass[50], cPass[50];
+	int tempAge;
+	
+	if (userCount < MAX_USER){
+		printf("Please enter the required data below: \n");
+	
+		do{
+			printf("Please create your username!\n");            //USERNAME
+			scanf("%s", tempUser);	
+			printf("\n");
+			
+			if (userValidation (data, userCount, tempUser) /* == 1 */== 1){
+				printf("This username has already been taken, please try again.\n");
+				} else {
+					strcpy(data[userCount].username, tempUser);
+				}
+		}  while (userValidation(data, userCount, tempUser) == 1);
+	
+		printf("Please enter your first name!\n");
+		scanf("%s", fName);
+		printf("Please enter your last name!\n");
+		scanf("%s", lName);
+		
+			strcpy(data[userCount].fullName, fName);
+			strcat(data[userCount].fullName, " ");
+       		strcat(data[userCount].fullName, lName);
+		//Alternative to the strcat function:
+		//snprintf(data[*userCount].fullName, sizeof(data[*userCount].fullName), "%s %s", fName, lName);
+		
+		printf("Please enter your age!\n");
+		scanf("%d", &tempAge);
+		
+		data[userCount].age = tempAge;
+	
+		do {
+			printf("Please enter your email!\n");
+			scanf("%s", tempEmail);
+			emailValidation(tempEmail);
+			
+			if (emailValidation(tempEmail) == 0){
+				printf("Please enter a valid address.\n");
+			} else {	
+				strcpy(data[userCount].email, tempEmail);
+			}
+		} while (emailValidation(tempEmail) == 0);
+	
+		do {
+			printf("Please create your password!\n");
+			scanf("%s", pass);			
+			printf("Please confirm your password!\n");
+			scanf("%s", cPass);
+						
+			int valid = passValidation(pass, cPass);
+			if(valid){
+				strcpy(data[userCount].password, pass);
+				printf("Your password have no issues, you may now continue...\n");
+			} else {
+				printf("Please make sure that your password consists of at least 8 characters and must contain at least one digit!\n");
+			}
+		} while (passValidation(pass, cPass) == 0);
+	
+		printf("Sending verification link to your email...\n");
+		printf("Ding! You have received a link from CyclusCare:\n");
+		printf("1. It's me, Verify this.\n");
+		printf("2. What? I don't follow.\n");
+		int opt6;
+		scanf("%d", &opt6);
+		printf("\n");
+		switch (opt6){
+			case 1: 
+				printf("Thank you for verifying!, Welcome to CyclusFamily!\n");
+				data[userCount].sD = REGULAR;
+				userCount++;				
+				break;
+				
+			case 2: 
+				printf("Okay! Thanks for informing us!\n");
+				break;
+		
+			default: 
+				printf("Sorry? Your input seems to be invalid.\n");
+				break;
+		}	
+	} else {
+		printf("Oops! Our system is nearly overloaded, We are terribly sorry!\n");
+	}
+	return;
+}
+
+void signIN(userData data[], int userCount){
+	char iUser[50], iPass[50];
+	
+	int index = -1, attempt = 0; //Search through data linearly
+	do{
+		printf("Please enter your username: ");
+		scanf("%s", iUser);
+		printf("Please enter your password: ");
+		scanf("%s", iPass);
+		printf("\n");
+		
+		if(strcmp(iUser, "admin") == 0){
+			if(strcmp(iPass, "adminLogin") == 0){
+				printf("Welcome back, Doctor! Redirecting to your page...\n");
+				doctorMenu();
+			}
+		}
+		
+		for (int i = 0; i < userCount; i++){
+			if((strcmp(iUser, data[i].username) == 0) && strcmp(iPass, data[i].username) == 0){
+				index = i;
+				printf("Login successful! Welcome, %s.\n", data[i].fullName);
+				break;
+			} else {
+				attempt++;
+				printf("Error: Incorrect Password or Username!\n");
+			}
+		}
+	} while ((index == -1) && (attempt < 3));
+	
+	printf("You have attempted for too any times!\n");
+	printf("Did you forgot your password?\n");
+	char opt4;
+	scanf("%c", opt4);
+	if (opt4 == 'y' || opt4 == 'Y'){
+		forgotPass(data, userCount);
+	} else {
+		printf("Very well, Now exiting the program\n");
+	}
+	return;
+} 
+
+void doctorMenu(){
+	int opt3;
+	do{
+		printf("What do you want to do today, Doctor?\n");
+		printf("1. Recruit new doctor to the team.\n");
+		printf("2. Add new article to homepage.\n");
+		printf("3. View upcoming consultation.");
+		printf("Make you decision below, doc!\n");
+		scanf("%d", &opt3);
+		printf("\n");
+		
+		switch (opt3){
+			case 1:
+				doctorUp();
+				break;
+		
+			case 2:
+				generalArticle();
+				break;
+		
+			case 3:
+				consultVIP();
+				break;
+		
+			default:
+				printf("Your input is invalid, Doc!\n");
+				break;
+		}
+	} while (opt3 < 1 || opt3 > 3);
+	
+	return;
+}
+
+void doctorUp(){
+	printf("This feature has not yet been fully developed due to lack of time resouces TT ~ TT\n");
+	return;
+}
+
+void generalArticle(){
+	printf("This feature has not yet been fully developed due to lack of time resouces TT ~ TT\n");
+	return;
+}
+
+void consultVIP(){
+	printf("This feature has not yet been fully developed due to lack of time resouces TT ~ TT\n");
+	return;
+}
