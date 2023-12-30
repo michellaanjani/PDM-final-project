@@ -11,8 +11,6 @@
 
 #define MAX_USER 100
 
-
-
 enum status{
 	VIP = 1,
 	REGULAR,
